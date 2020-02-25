@@ -2,6 +2,7 @@ import requests
 import shutil
 import subprocess
 import os
+import glob
 
 def save(settings):
     """COSMOSに訓練結果を保存
@@ -15,7 +16,17 @@ def save(settings):
     if "description" in settings.keys():
         with open(f"{settings['output_dir']}/description.txt", "w") as fp:
             fp.write(settings["description"])
-    # TODO: 自身のソースファイルを追加
+
+    # 擬似的な方法（自身のNotebookのコピー）
+    files = sorted(glob.glob("gdrive/My Drive/Colab Notebooks/*"))
+    notebooks = []
+    for f in files:
+        notebooks.append([f, os.stat(f).st_mtime])
+    if len(notebooks) > 0:
+        # 最も更新時間が最新のNotebook
+        notebooks = sorted(notebooks, key=lambda z: z[1])[::-1]
+        shutil.copy(notebooks[0][0], settings["output_dir"]+"/"+os.path.basename(notebooks[0][0]))
+
     # tarファイル化
     subprocess.run(f"tar -cvf cosmos_save.tar {settings['output_dir']}", shell=True).check_returncode()
     # バイナリ化
