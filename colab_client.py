@@ -1,6 +1,7 @@
 import requests
 import shutil
 import subprocess
+import os
 
 def save(settings):
     """COSMOSに訓練結果を保存
@@ -55,6 +56,8 @@ def load(settings, rev=None):
             shutil.copyfileobj(res.raw, fp)
             
         # extract tar
+        if not os.path.exists(settings["output_dir"]):
+            os.makedirs(settings["output_dir"])
         subprocess.run(f"tar -xvf cosmos_load.tar -C {settings['output_dir']} --strip-components=1", shell=True).check_returncode()
 
     print("--- Load from cosmos --")
